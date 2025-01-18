@@ -129,3 +129,85 @@ php artisan make:model Modelname -m
 #// for example for the Contact model with migration
 php  artisan make:model Contact  -m
 ```
+# File storage
+```php
+// FileUploadController
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\File;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class FileUploadController extends Controller
+{
+    function index()
+    {
+        return view("file-upload");
+    }
+
+    function store(Request $request)
+    {
+        // storing files 1 method
+        // $file = Storage::disk("public")->put("/", $request->file("file"));
+        // storing files 2 method
+        $file = $request->file("file")->store("/", 'public'); // public for public access and local for private access
+        $fileStore = new File();
+        $fileStore->file_path = $file;
+        $fileStore->save();
+
+        echo "Success";
+    }
+}
+
+```
+## Connect the storage/public storage directory with the public directory
+## to access assets from storage/public
+```bash
+php artisan storage:link
+```
+
+## create custom storage directory (config/filesystems.php)
+```php
+// filesystems.php add this 
+ 'disks' => [
+        'dir_public' => [
+            'driver' => 'local',
+            'root' => public_path('uploads'),
+            'url' => env('APP_URL').'/uploads',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+   ]
+```
+## deleting existing files from the storage and database
+```php
+// fileUploadController
+use Illuminate\Support\Facades\File as HandleFile
+
+class FileUploadController extends Controller{
+    public function delete(){
+        $file = \App\Models\File::find("fileId");
+        HandleFile::delete(public_path($file->file_path));
+        $file->delete();
+        
+        $files = \App\Models\File::all();
+    }
+}
+```
+
+## file validation
+```php
+function store(Request $request){
+    $request->validate([
+        'file' => ["required", "file", 'mimes:zip,pdf,csv']
+    ]); // validation for file zip, pdf and csv only
+}
+```
+
+## intercept a specific input error with blade
+```php
+//file-upload.blade.php
+
+```

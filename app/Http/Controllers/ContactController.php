@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ContactStoreRequest;
+use App\Mail\SendMail;
 use App\Models\Contact;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
@@ -23,6 +25,13 @@ class ContactController extends Controller
         $contact->message = $request->message;
         $contact->save();
 
-        dd("contact form submitted successfully");
+//        Mail::raw($request->message, function ($message) use ($request){
+//            $message->to($request->email)
+//                ->subject($request->subject);
+//        });
+
+        Mail::to($request->email)->send(new SendMail($request->message, $request->subect));
+
+        return redirect()->route('welcome');
     }
 }

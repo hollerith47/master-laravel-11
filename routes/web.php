@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,10 +22,24 @@ Route::get("get-users", [\App\Http\Controllers\UserController::class, "showUsers
 Route::get("update-user", [\App\Http\Controllers\UserController::class, "updateUser"]);
 Route::get("delete-user", [\App\Http\Controllers\UserController::class, "deleteUser"]);
 
+Route::get("file-upload", [\App\Http\Controllers\FileUploadController::class, 'index'])->name("file.upload");
+Route::post("file-upload", [\App\Http\Controllers\FileUploadController::class, 'store'])->name("file.store");
+
+Route::get("send-mail", function (){
+    $msg = "Welcome mailtrap";
+    $email = "hello@example.com";
+    $subject = "testing mailtrap";
+   Mail::raw($msg, function ($message) use ($msg, $email, $subject){
+       $message->to($email)
+       ->subject($subject);
+   });
+   dd("email sent successfully");
+});
+
 // page 404
 Route::fallback(function (){
     return view("404");
-});
+})->fallback();
 
 
 
